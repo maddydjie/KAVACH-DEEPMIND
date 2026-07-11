@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kavach - Zero-UI Safety System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slateBlack: '#0A0C10',
+                        deepSlate: '#131720',
+                        surfaceGray: '#1E2430',
+                        borderGray: '#2C3545',
+                        crimsonRed: '#FF3366',
+                        safetyGreen: '#00E676',
+                        cyberOrange: '#FFA000',
+                        iceWhite: '#ECEFF1',
+                        mutedSlate: '#78909C',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            background: #0A0C10;
+            color: #ECEFF1;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        .pulse-ring {
+            animation: pulse 1.5s infinite ease-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .dead-screen {
+            background: black !important;
+        }
+
+        .dead-screen > * {
+            display: none !important;
+        }
+
+        .dead-screen .overlay-hint {
+            display: flex !important;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            z-index: 50;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(255,51,102,0) 70%, rgba(255,51,102,0.2) 100%);
+            animation: spin 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col relative" id="appBody">
+
+    <!-- Mode Toggle Overlay -->
+    <div class="absolute top-4 right-4 z-40 flex items-center gap-3">
+        <span id="modeLabel" class="text-xs font-bold text-safetyGreen tracking-wider">GHOST OPERATOR (ON)</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="modeToggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-deepSlate peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-iceWhite after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyberOrange border border-borderGray"></div>
+        </label>
+    </div>
+
+    <!-- MAIN HUB VIEW -->
+    <div id="hubView" class="flex flex-col h-full px-6 pt-20 pb-10 gap-8">
+        <!-- Header -->
+        <div class="flex flex-col items-center justify-center pt-8">
+            <div class="relative w-32 h-32 flex items-center justify-center mb-6">
+                <!-- Outer Dashed Ring -->
+                <div class="absolute inset-0 rounded-full border border-dashed border-borderGray spin-slow"></div>
+                <!-- Middle Ring -->
+                <div class="absolute inset-2 rounded-full border border-surfaceGray"></div>
+                <!-- Inner Core -->
+                <div class="absolute inset-6 rounded-full bg-deepSlate border border-borderGray flex items-center justify-center">
+                    <span class="material-icons text-crimsonRed text-4xl">shield</span>
+                </div>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-widest text-iceWhite">KAVACH</h1>
+            <p class="text-mutedSlate text-sm tracking-wide mt-2">AUTONOMOUS SAFETY COMPANION</p>
+        </div>
+
+        <!-- Safe Zone -->
+        <div class="bg-deepSlate border border-borderGray rounded-2xl p-5 flex items-center gap-4">
+            <div class="bg-surfaceGray p-3 rounded-xl border border-borderGray">
+                <span class="material-icons text-safetyGreen">place</span>
+            </div>
+            <div class="flex-1">
+                <p class="text-xs text-mutedSlate uppercase tracking-wider mb-1">Nearest Safe Zone</p>
+                <p class="text-sm font-semibold text-iceWhite" id="safeZoneText">CVS 24/7 Pharmacy (0.2 mi)</p>
+            </div>
+        </div>
+
+        <!-- Trigger Button -->
+        <div class="flex-1 flex items-center justify-center">
+            <button id="triggerBtn" class="relative group w-32 h-32 rounded-full bg-crimsonRed text-iceWhite font-bold shadow-[0_0_40px_rgba(255,51,102,0.4)] flex flex-col items-center justify-center transition-transform hover:scale-105 active:scale-95">
+                <span class="material-icons text-3xl mb-1">warning</span>
+                <span class="tracking-widest">CODE RED</span>
+            </button>
+        </div>
+        
+        <!-- Story Note -->
+        <div class="text-center text-xs text-mutedSlate">
+            <p>Demo Trigger: Press Button</p>
+            <p class="mt-1">Story Safeword: "Battery at 2 percent"</p>
+        </div>
+    </div>
+
+    <!-- ACTIVE SHIELD (GHOST / DARK SURVIVAL) VIEW -->
+    <div id="activeView" class="hidden flex-col h-full px-6 pt-20 pb-8 gap-6">
+        <!-- HUD Header -->
+        <div class="flex items-center gap-4 mb-4">
+            <div class="relative w-14 h-14 flex items-center justify-center">
+                <div class="absolute inset-0 bg-crimsonRed/20 rounded-full pulse-ring"></div>
+                <div class="absolute inset-0 rounded-full radar-sweep"></div>
+                <div class="absolute inset-1 rounded-full bg-crimsonRed border border-red-500 flex items-center justify-center z-10">
+                    <span class="material-icons text-white text-xl">gpp_bad</span>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-lg font-black text-crimsonRed tracking-widest" id="activeTitle">GHOST OPERATOR ENGAGED</h2>
+                <p class="text-xs font-bold text-mutedSlate" id="activeSubtitle">AUTONOMOUS ORCHESTRATION</p>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="flex-1 bg-deepSlate border border-borderGray rounded-2xl p-4 overflow-y-auto flex flex-col gap-3 font-mono text-xs" id="eventLog">
+            <!-- Events injected here -->
+        </div>
+
+        <!-- Resolve Button -->
+        <button id="resolveBtn" class="w-full bg-surfaceGray border border-borderGray rounded-xl py-4 flex items-center justify-center gap-2 text-iceWhite font-bold uppercase tracking-widest transition-colors hover:bg-borderGray">
+            <span class="material-icons">verified_user</span>
+            Resolve Incident
+        </button>
+    </div>
+
+    <!-- Dead Screen Overlay Hint -->
+    <div class="overlay-hint hidden" id="deadScreenHint">
+        Double tap anywhere to reveal Tactical HUD (or restore network)
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
